@@ -134,8 +134,7 @@
       rows.forEach((row) => {
         const title = row.cells[0].textContent.toLowerCase();
         const author = row.cells[1].textContent.toLowerCase();
-        
-        alert(title, author, category);
+      
         if (title.includes(searchInput) || author.includes(searchInput) ) {	
           row.style.display = "";
         } else {
