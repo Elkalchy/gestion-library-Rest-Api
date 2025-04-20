@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Books List</title>
+  <style>
+    /* style.css */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    header {
+      background-color: #4caf50;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+
+    #add-book-btn {
+      background-color: #008cba;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table thead tr th{
+      background: turquoise;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+    table tbody tr{
+      transition: all 0.5s ease-in-out;
+    }
+    table tbody tr:hover {
+      background-color: #27101060;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Books List</h1>
+    <button id="add-book-btn">Add Book</button>
+    <input type="text" id="search" placeholder="Search by title or author" onkeyup="searchBooks()" style="float: right;" />
+  </header>
+
+  <main>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Category</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="books-container">
+        <!-- Book rows will be added here -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    // Fonction pour charger les livres
+    function loadBooks() {
+      const booksContainer = document.getElementById("books-container");
+      fetch("http://localhost:8000/api/books/")
+        .then((response) => response.json())
+        .then((data) => {
+          if(!data.length){
+            booksContainer.innerHTML = "<tr><td colspan='4'>No books available</td></tr>";
+            return;
+          }
+          // Vider le conteneur avant d'ajouter les livres
+          booksContainer.innerHTML = "";
+          data.forEach((book) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${book.title}</td>
+              <td>${book.auteur}</td>
+              <td>${book.categorie}</td>
+              <td>
+                <button onclick="editBook(${book.id})">Edit</button>
+                <button onclick="deleteBook(${book.id})">Delete</button>
+              </td>
+            `;
+            booksContainer.appendChild(row);
+          });
+        })
+        .catch((error) => console.error("Error loading books:", error));
+    }
+
+    // Fonction pour supprimer un livre
+    function deleteBook(bookId) {
+      if (!confirm("Are you sure you want to delete this book?")) return;
+      fetch(`http://localhost:8000/api/books/${bookId}/delete/`, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (response.status === 204) {
+            alert("Book deleted successfully!");
+            loadBooks(); // Recharge la liste
+          } else {
+            alert("Error deleting book");
+          }
+        })
+        .catch((error) => console.error("Error deleting book:", error));
+    }
+
+    // Redirection vers la page d'édition
+    function editBook(bookId) {
+      window.location.href = `edit_book.html?book_id=${bookId}`;
+    }
+
+    function searchBooks() {
+      const searchInput = document.getElementById("search").value.toLowerCase();
+      const rows = document.querySelectorAll("#books-container tr");
+      rows.forEach((row) => {
+        const title = row.cells[0].textContent.toLowerCase();
+        const author = row.cells[1].textContent.toLowerCase();
+        
+        alert(title, author, category);
+        if (title.includes(searchInput) || author.includes(searchInput) ) {	
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    }
+    // Quand le DOM est prêt
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("add-book-btn").addEventListener("click", () => {
+        window.location.href = "add_book.html";
+      });
+
+      loadBooks(); // Charge les livres au démarrage
+    });
+  </script>
+</body>
+</html>
